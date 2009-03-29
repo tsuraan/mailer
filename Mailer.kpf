@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="bca9965b-fdf1-4bdd-9aac-43b4dacc387c" kpf_version="4" name="Mailer.kpf">
+<preference-set idref="bca9965b-fdf1-4bdd-9aac-43b4dacc387c">
+  <boolean id="import_live">1</boolean>
+</preference-set>
+</project>
