@@ -28,6 +28,8 @@ mailer.send(message)
 """
 import smtplib
 
+
+
 # this is to support name changes
 # from version 2.4 to version 2.5
 try:
@@ -90,7 +92,6 @@ class Mailer(object):
             server.login(self._usr, self._pwd)
 
         try:
-            num_msgs = len(msg)
             for m in msg:
                 self._send(server, m)
         except TypeError:
@@ -104,7 +105,7 @@ class Mailer(object):
         we created in send()
         """
         me = msg.From
-        you = [x.strip() for x in msg.To.split(",")]
+        you = [x.split() for x in msg.To.split(",")]
         server.sendmail(me, you, msg.as_string())
 
 class Message(object):
@@ -156,9 +157,7 @@ class Message(object):
         """Plain text email with no attachments"""
 
         if not self.Html:
-            msg = MIMEText(unicode(self.Body, self.charset),
-                           'plain',
-                           self.charset)
+            msg = MIMEText(self.Body, 'html', self.charset)
         else:
             msg  = self._with_html()
 
@@ -170,12 +169,7 @@ class Message(object):
 
         outer = MIMEMultipart('alternative')
         
-        if self.Body:
-            part1 = MIMEText(unicode(self.Body, self.charset),
-                            'plain',
-                            self.charset)
-        else:
-            part1 = MIMEText(None)
+        part1 = MIMEText(self.Body, 'plain', self.charset)
         part2 = MIMEText(self.Html, 'html', self.charset)
 
         outer.attach(part1)
