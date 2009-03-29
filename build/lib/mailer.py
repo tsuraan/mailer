@@ -28,8 +28,6 @@ mailer.send(message)
 """
 import smtplib
 
-
-
 # this is to support name changes
 # from version 2.4 to version 2.5
 try:
@@ -92,6 +90,7 @@ class Mailer(object):
             server.login(self._usr, self._pwd)
 
         try:
+            num_msgs = len(msg)
             for m in msg:
                 self._send(server, m)
         except TypeError:
@@ -105,7 +104,7 @@ class Mailer(object):
         we created in send()
         """
         me = msg.From
-        you = [x.split() for x in msg.To.split(",")]
+        you = [x.strip() for x in msg.To.split(",")]
         server.sendmail(me, you, msg.as_string())
 
 class Message(object):
@@ -135,6 +134,11 @@ class Message(object):
         self.charset = charset or 'us-ascii'
 
     def _get_to(self):
+        """
+        Making this a property so we can be permissive about how
+        to set the "To" field, i.e.
+        me;you/me,you/me; you/me, you
+        """
         addrs = self._to.replace(";", ",").split(",")
         return ", ".join([x.strip()
                           for x in addrs])
@@ -157,7 +161,7 @@ class Message(object):
         """Plain text email with no attachments"""
 
         if not self.Html:
-            msg = MIMEText(self.Body, 'html', self.charset)
+            msg = MIMEText(self.Body, 'plain', self.charset)
         else:
             msg  = self._with_html()
 
@@ -191,7 +195,7 @@ class Message(object):
 
         msg = MIMEMultipart()
         
-        msg.attach(MIMEText(self.Body, 'plain'))
+        msg.attach(MIMEText(self.Body, 'plain', self.charset))
 
         self._set_info(msg)
         msg.preamble = self.Subject

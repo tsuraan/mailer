@@ -134,6 +134,11 @@ class Message(object):
         self.charset = charset or 'us-ascii'
 
     def _get_to(self):
+        """
+        Making this a property so we can be permissive about how
+        to set the "To" field, i.e.
+        me;you/me,you/me; you/me, you
+        """
         addrs = self._to.replace(";", ",").split(",")
         return ", ".join([x.strip()
                           for x in addrs])
@@ -156,9 +161,7 @@ class Message(object):
         """Plain text email with no attachments"""
 
         if not self.Html:
-            msg = MIMEText(unicode(self.Body, self.charset),
-                           'plain',
-                           self.charset)
+            msg = MIMEText(self.Body, 'plain', self.charset)
         else:
             msg  = self._with_html()
 
@@ -170,12 +173,7 @@ class Message(object):
 
         outer = MIMEMultipart('alternative')
         
-        if self.Body:
-            part1 = MIMEText(unicode(self.Body, self.charset),
-                            'plain',
-                            self.charset)
-        else:
-            part1 = MIMEText(None)
+        part1 = MIMEText(self.Body, 'plain', self.charset)
         part2 = MIMEText(self.Html, 'html', self.charset)
 
         outer.attach(part1)
@@ -197,7 +195,7 @@ class Message(object):
 
         msg = MIMEMultipart()
         
-        msg.attach(MIMEText(self.Body, 'plain'))
+        msg.attach(MIMEText(self.Body, 'plain', self.charset))
 
         self._set_info(msg)
         msg.preamble = self.Subject

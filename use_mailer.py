@@ -16,7 +16,6 @@ msg1.Subject = "日本語のHTMLメール"
 msg1.Html = """Hello, <b>日本語</b>"""
 
 mailer = Mailer('smtp01.odn.ne.jp')
-mailer.send(msg1)
 
 msg2 = Message(Body="ナイスボディー!", attachments=["picture.png"])
 msg2.From = "translation@ginstrom.com"
@@ -29,7 +28,8 @@ mailer.send([msg1, msg2])
 msg = Message()
 msg.From = "translation@ginstrom.com"
 msg.To = "translation@ginstrom.com"
-msg.Subject = "Just plain text"
-msg.Body = open("letter.txt", "rb").read()
+msg.Subject = "テキストメール"
+msg.Body = "これは日本語のキストメールでございます。"
+msg.charset = "utf-8"
 mailer.send(msg)
 
