@@ -22,8 +22,8 @@ message.Subject = "My Vacation"
 message.Body = open("letter.txt", "rb").read()
 message.attach("picture.jpg")
 
-mailer = mailer.Mailer('mail.example.com')
-mailer.send(message)
+sender = mailer.Mailer('mail.example.com')
+sender.send(message)
 
 """
 import smtplib
@@ -54,7 +54,7 @@ import mimetypes
 
 from os import path
 
-__version__ = "0.2"
+__version__ = "0.3"
 __author__ = "Ryan Ginstrom"
 __license__ = "MIT"
 __description__ = "A module to send email simply in Python"
@@ -104,7 +104,10 @@ class Mailer(object):
         we created in send()
         """
         me = msg.From
-        you = [x.strip() for x in msg.To.split(",")]
+        if isinstance(msg.To, basestring):
+            you = [msg.To]
+        else:
+            you = list(msg.To)
         server.sendmail(me, you, msg.as_string())
 
 class Message(object):
@@ -120,34 +123,23 @@ class Message(object):
     If you specify an attachments argument, it should be a list of
     attachment filenames: ["file1.txt", "file2.txt"]
     
+    `To` should be a string for a single address, and a sequence
+    of strings for multiple recipients (castable to list)
+    
     Send using the Mailer class.
     """
 
     def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None,
                  attachments=None, charset=None):
         self.attachments = attachments or []
-        self._to = To
+        self.To = To
+        """string or iterable"""
         self.From = From
+        """string"""
         self.Subject = Subject
         self.Body = Body
         self.Html = Html
         self.charset = charset or 'us-ascii'
-
-    def _get_to(self):
-        """
-        Making this a property so we can be permissive about how
-        to set the "To" field, i.e.
-        me;you/me,you/me; you/me, you
-        """
-        addrs = self._to.replace(";", ",").split(",")
-        return ", ".join([x.strip()
-                          for x in addrs])
-    def _set_to(self, to):
-        self._to = to
-    
-    To = property(_get_to, _set_to,
-                  doc="""The recipient(s) of the email.
-                  Separate multiple recipients with commas or semicolons""")
 
     def as_string(self):
         """Get the email as a string to send in the mailer"""
@@ -188,7 +180,11 @@ class Message(object):
             subject = unicode(self.Subject, self.charset)
             msg['Subject'] = str(make_header([(subject, self.charset)]))
         msg['From'] = self.From
-        msg['To'] = self.To
+        if isinstance(self.To, basestring):
+            msg['To'] = self.To
+        else:
+            self.To = list(self.To)
+            msg['To'] = ", ".join(self.To)
 
     def _multipart(self):
         """The email has attachments"""

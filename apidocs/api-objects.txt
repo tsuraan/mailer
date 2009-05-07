@@ -9,13 +9,12 @@ mailer.mailer.Mailer.login	mailer.mailer.Mailer-class.html#login
 mailer.mailer.Mailer.__init__	mailer.mailer.Mailer-class.html#__init__
 mailer.mailer.Message	mailer.mailer.Message-class.html
 mailer.mailer.Message._plaintext	mailer.mailer.Message-class.html#_plaintext
-mailer.mailer.Message.attach	mailer.mailer.Message-class.html#attach
+mailer.mailer.Message.From	mailer.mailer.Message-class.html#From
+mailer.mailer.Message.To	mailer.mailer.Message-class.html#To
 mailer.mailer.Message.as_string	mailer.mailer.Message-class.html#as_string
 mailer.mailer.Message._add_attachment	mailer.mailer.Message-class.html#_add_attachment
-mailer.mailer.Message._set_to	mailer.mailer.Message-class.html#_set_to
-mailer.mailer.Message.To	mailer.mailer.Message-class.html#To
+mailer.mailer.Message.attach	mailer.mailer.Message-class.html#attach
 mailer.mailer.Message._multipart	mailer.mailer.Message-class.html#_multipart
-mailer.mailer.Message._get_to	mailer.mailer.Message-class.html#_get_to
 mailer.mailer.Message._with_html	mailer.mailer.Message-class.html#_with_html
 mailer.mailer.Message._set_info	mailer.mailer.Message-class.html#_set_info
 mailer.mailer.Message.__init__	mailer.mailer.Message-class.html#__init__

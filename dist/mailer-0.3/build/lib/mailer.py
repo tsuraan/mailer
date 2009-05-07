@@ -54,7 +54,7 @@ import mimetypes
 
 from os import path
 
-__version__ = "0.4"
+__version__ = "0.3"
 __author__ = "Ryan Ginstrom"
 __license__ = "MIT"
 __description__ = "A module to send email simply in Python"
@@ -66,9 +66,8 @@ class Mailer(object):
     Use login() to log in with a username and password.
     """
 
-    def __init__(self, host="localhost", port=0):
+    def __init__(self, host="localhost"):
         self.host = host
-        self.port = port
         self._usr = None
         self._pwd = None
     
@@ -85,7 +84,7 @@ class Mailer(object):
         them as a list:
         mailer.send([msg1, msg2, msg3])
         """
-        server = smtplib.SMTP(self.host, self.port)
+        server = smtplib.SMTP(self.host)
 
         if self._usr and self._pwd:
             server.login(self._usr, self._pwd)
@@ -184,7 +183,6 @@ class Message(object):
         if isinstance(self.To, basestring):
             msg['To'] = self.To
         else:
-            self.To = list(self.To)
             msg['To'] = ", ".join(self.To)
 
     def _multipart(self):

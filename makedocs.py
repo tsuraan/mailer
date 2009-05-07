@@ -57,6 +57,7 @@ def gen_api_docs():
                                '--exclude=use_mailer',
                                '--exclude=makedocs',
                                '--debug',
+                               '--no-frames',
                                r'"%s"' % base_dir]))
 
     print "Finished generating documentation!"

@@ -52,10 +52,6 @@
         <!-- hide/show private -->
         <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
     onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
-        <tr><td align="right"><span class="options"
-            >[<a href="frames.html" target="_top">frames</a
-            >]&nbsp;|&nbsp;<a href="mailer.mailer.Message-class.html"
-            target="_top">no&nbsp;frames</a>]</span></td></tr>
       </table>
     </td>
   </tr>
@@ -64,11 +60,12 @@
 <h1 class="epydoc">Class Message</h1><span class="codelink"><a href="mailer.mailer-pysrc.html#Message">source&nbsp;code</a></span><br /><br />
 <center>
 <center>  <map id="uml_class_diagram_for_mailer_m_2" name="uml_class_diagram_for_mailer_m_2">
-<area shape="rect" href="mailer.mailer.Message&#45;class.html#To" title="The recipient(s) of the email." alt="" coords="17,28,700,47" />
-<area shape="rect" href="mailer.mailer.Message&#45;class.html#attach" title="Attach a file to the email." alt="" coords="17,49,700,68" />
+<area shape="rect" href="mailer.mailer.Message&#45;class.html#From" title="string" alt="" coords="17,28,700,47" />
+<area shape="rect" href="mailer.mailer.Message&#45;class.html#To" title="string or iterable" alt="" coords="17,47,700,65" />
 <area shape="rect" href="mailer.mailer.Message&#45;class.html#as_string" title="Get the email as a string to send in the mailer" alt="" coords="17,68,700,87" />
-<area shape="rect" href="mailer.mailer.Message&#45;class.html#__init__" title="x.__init__(...) initializes x; see x.__class__.__doc__ for signature" alt="" coords="17,87,700,105" />
-<area shape="rect" href="mailer.mailer.Message&#45;class.html" title="Represents an email message." alt="" coords="5,5,712,112" />
+<area shape="rect" href="mailer.mailer.Message&#45;class.html#attach" title="Attach a file to the email." alt="" coords="17,87,700,105" />
+<area shape="rect" href="mailer.mailer.Message&#45;class.html#__init__" title="x.__init__(...) initializes x; see x.__class__.__doc__ for signature" alt="" coords="17,105,700,124" />
+<area shape="rect" href="mailer.mailer.Message&#45;class.html" title="Represents an email message." alt="" coords="5,5,712,131" />
 </map>
   <img src="uml_class_diagram_for_mailer_m_2.gif" alt='' usemap="#uml_class_diagram_for_mailer_m_2" ismap="ismap" class="graph-without-title" />
 </center></center>
@@ -81,6 +78,8 @@
   us-ascii</p>
   <p>If you specify an attachments argument, it should be a list of 
   attachment filenames: [&quot;file1.txt&quot;, &quot;file2.txt&quot;]</p>
+  <p>`To` should be a string for a single address, and a sequence of 
+  strings for multiple recipients (castable to list)</p>
   Send using the Mailer class.<br /><br />
 
 <!-- ==================== INSTANCE METHODS ==================== -->
@@ -118,41 +117,6 @@
       signature</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="mailer.mailer-pysrc.html#Message.__init__">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="mailer.mailer.Message-class.html#_get_to" class="summary-sig-name">_get_to</a>(<span class="summary-sig-arg">self</span>)</span><br />
-      Making this a property so we can be permissive about how to set 
-      the &quot;To&quot; field, i.e.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="mailer.mailer-pysrc.html#Message._get_to">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="_set_to"></a><span class="summary-sig-name">_set_to</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">to</span>)</span></td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="mailer.mailer-pysrc.html#Message._set_to">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -297,6 +261,40 @@
     </td>
   </tr>
 </table>
+<!-- ==================== INSTANCE VARIABLES ==================== -->
+<a name="section-InstanceVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="To"></a><span class="summary-name">To</span><br />
+      string or iterable
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="From"></a><span class="summary-name">From</span><br />
+      string
+    </td>
+  </tr>
+</table>
 <!-- ==================== PROPERTIES ==================== -->
 <a name="section-Properties"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -314,14 +312,6 @@
     </table>
   </td>
 </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="mailer.mailer.Message-class.html#To" class="summary-name">To</a><br />
-      The recipient(s) of the email.
-    </td>
-  </tr>
   <tr>
     <td colspan="2" class="summary">
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
@@ -380,26 +370,6 @@
   </dl>
 </td></tr></table>
 </div>
-<a name="_get_to"></a>
-<div class="private">
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">_get_to</span>(<span class="sig-arg">self</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="mailer.mailer-pysrc.html#Message._get_to">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </table>
-  
-  Making this a property so we can be permissive about how to set the 
-  &quot;To&quot; field, i.e. me;you/me,you/me; you/me, you
-  <dl class="fields">
-  </dl>
-</td></tr></table>
-</div>
 <a name="attach"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -418,46 +388,6 @@
   Attach a file to the email. Specify the name of the file; Message will
   figure out the MIME type and load the file.
   <dl class="fields">
-  </dl>
-</td></tr></table>
-</div>
-<br />
-<!-- ==================== PROPERTY DETAILS ==================== -->
-<a name="section-PropertyDetails"></a>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr bgcolor="#70b0f0" class="table-header">
-  <td colspan="2" class="table-header">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr valign="top">
-        <td align="left"><span class="table-header">Property Details</span></td>
-        <td align="right" valign="top"
-         ><span class="options">[<a href="#section-PropertyDetails"
-         class="privatelink" onclick="toggle_private();"
-         >hide private</a>]</span></td>
-      </tr>
-    </table>
-  </td>
-</tr>
-</table>
-<a name="To"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <h3 class="epydoc">To</h3>
-  The recipient(s) of the email. Separate multiple recipients with 
-  commas or semicolons
-  <dl class="fields">
-    <dt>Get Method:</dt>
-    <dd class="value"><span class="summary-sig"><a href="mailer.mailer.Message-class.html#_get_to" class="summary-sig-name">mailer.mailer.Message._get_to</a>(<span class="summary-sig-arg">self</span>)</span>
-        - Making this a property so we can be permissive about how to set 
-      the &quot;To&quot; field, i.e.
-    </dd>
-    <dt>Set Method:</dt>
-    <dd class="value"><span class="summary-sig"><a href="mailer.mailer.Message-class.html#_set_to" class="summary-sig-name">mailer.mailer.Message._set_to</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">to</span>)</span>
-    </dd>
   </dl>
 </td></tr></table>
 </div>
@@ -493,7 +423,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0beta1 on Sun Mar 29 12:20:25 2009
+    <a href="/code/mailer.html">mailer</a> module documentation. Generated by Epydoc 3.0beta1 on Sat Apr 25 17:53:11 2009
     </td>
     <td align="right" class="footer">
       <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
