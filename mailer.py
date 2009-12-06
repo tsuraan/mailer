@@ -11,19 +11,21 @@ http://docs.python.org/library/email-examples.html
 
 Released under MIT license.
 
+Version 0.5 is based on a patch by Douglas Mayle
+
 Sample code:
 
-import mailer
-
-message = mailer.Message()
-message.From = "me@example.com"
-message.To = "you@example.com"
-message.Subject = "My Vacation"
-message.Body = open("letter.txt", "rb").read()
-message.attach("picture.jpg")
-
-sender = mailer.Mailer('mail.example.com')
-sender.send(message)
+    import mailer
+    
+    message = mailer.Message()
+    message.From = "me@example.com"
+    message.To = "you@example.com"
+    message.Subject = "My Vacation"
+    message.Body = open("letter.txt", "rb").read()
+    message.attach("picture.jpg")
+    
+    sender = mailer.Mailer('mail.example.com')
+    sender.send(message)
 
 """
 import smtplib
@@ -54,7 +56,7 @@ import mimetypes
 
 from os import path
 
-__version__ = "0.4"
+__version__ = "0.5"
 __author__ = "Ryan Ginstrom"
 __license__ = "MIT"
 __description__ = "A module to send email simply in Python"
@@ -132,7 +134,18 @@ class Message(object):
 
     def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None,
                  attachments=None, charset=None):
-        self.attachments = attachments or []
+        self.attachments = []
+        if attachments:
+            for attachment in attachments:
+                if isinstance(attachment, basestring):
+                    self.attachments.append((attachment, None))
+                else:
+                    try:
+                        filename, cid = attachment
+                    except (TypeError, IndexError):
+                        self.attachments.append((attachment, None))
+                    else:
+                        self.attachments.append((filename, cid))
         self.To = To
         """string or iterable"""
         self.From = From
@@ -190,18 +203,32 @@ class Message(object):
     def _multipart(self):
         """The email has attachments"""
 
-        msg = MIMEMultipart()
-        
-        msg.attach(MIMEText(self.Body, 'plain', self.charset))
+        msg = MIMEMultipart('related')
+
+        if self.Html:
+            outer = MIMEMultipart('alternative')
+            
+            part1 = MIMEText(self.Body, 'plain', self.charset)
+            part1.add_header('Content-Disposition', 'inline')
+
+            part2 = MIMEText(self.Html, 'html', self.charset)
+            part2.add_header('Content-Disposition', 'inline')
+
+            outer.attach(part1)
+            outer.attach(part2)
+            msg.attach(outer)
+        else:
+            msg.attach(MIMEText(self.Body, 'plain', self.charset))
 
         self._set_info(msg)
         msg.preamble = self.Subject
 
-        for filename in self.attachments:
-            self._add_attachment(msg, filename)
+        for filename, cid in self.attachments:
+            self._add_attachment(msg, filename, cid)
+
         return msg.as_string()
 
-    def _add_attachment(self, outer, filename):
+    def _add_attachment(self, outer, filename, cid):
         ctype, encoding = mimetypes.guess_type(filename)
         if ctype is None or encoding is not None:
             # No guess could be made, or the file is encoded (compressed), so
@@ -222,14 +249,20 @@ class Message(object):
             # Encode the payload using Base64
             encoders.encode_base64(msg)
         fp.close()
-        # Set the filename parameter
-        msg.add_header('Content-Disposition', 'attachment', filename=path.basename(filename))
+
+        # Set the content-ID header
+        if cid:
+            msg.add_header('Content-ID', '<%s>' % cid)
+            msg.add_header('Content-Disposition', 'inline')
+        else:
+            # Set the filename parameter
+            msg.add_header('Content-Disposition', 'attachment', filename=path.basename(filename))
         outer.attach(msg)
 
-    def attach(self, filename):
+    def attach(self, filename, cid=None):
         """
         Attach a file to the email. Specify the name of the file;
         Message will figure out the MIME type and load the file.
         """
         
-        self.attachments.append(filename)
+        self.attachments.append((filename, cid))

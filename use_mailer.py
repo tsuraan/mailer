@@ -33,3 +33,10 @@ msg.Body = "これは日本語のキストメールでございます。"
 msg.charset = "utf-8"
 mailer.send(msg)
 
+msg3 = Message(From="translation@ginstrom.com",
+                  To=["translation@ginstrom.com", "software@ginstrom.com"],
+                  charset="utf-8")
+msg3.Subject = "HTML with Attachment"
+msg3.Html = """Hello, <b>日本語</b>"""
+msg3.attach("picture.png")
+mailer.send(msg3)
