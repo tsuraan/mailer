@@ -53,6 +53,7 @@ except ImportError:
 
 # For guessing MIME type based on file name extension
 import mimetypes
+import time
 
 from os import path
 
@@ -150,7 +151,7 @@ class Message(object):
     """
 
     def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None,
-                 attachments=None, charset=None):
+                 Date=None, attachments=None, charset=None):
         self.attachments = []
         if attachments:
             for attachment in attachments:
@@ -170,6 +171,7 @@ class Message(object):
         self.Subject = Subject
         self.Body = Body
         self.Html = Html
+        self.Date = Date or time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime())
         self.charset = charset or 'us-ascii'
 
     def as_string(self):
@@ -216,6 +218,7 @@ class Message(object):
         else:
             self.To = list(self.To)
             msg['To'] = ", ".join(self.To)
+        msg['Date'] = self.Date
 
     def _multipart(self):
         """The email has attachments"""
