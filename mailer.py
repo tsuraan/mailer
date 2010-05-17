@@ -69,9 +69,10 @@ class Mailer(object):
     Use login() to log in with a username and password.
     """
 
-    def __init__(self, host="localhost", port=0):
+    def __init__(self, host="localhost", port=25, useTls=False):
         self.host = host
         self.port = port
+        self.useTls = useTls
         self._usr = None
         self._pwd = None
 
@@ -88,10 +89,13 @@ class Mailer(object):
         them as a list:
         mailer.send([msg1, msg2, msg3])
         """
-        if 'gmail.com' in self.host or 'googlemail.com' in self.host:
-            server = self._get_gmail_server()
-        else:
-            server = self._get_mailserver()
+        server = smtplib.SMTP(self.host, self.port)
+        if self.useTls:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+        if self._usr and self._pwd:
+            server.login(self._usr, self._pwd)
 
         try:
             num_msgs = len(msg)
@@ -101,23 +105,6 @@ class Mailer(object):
             self._send(server, msg)
 
         server.quit()
-
-    def _get_mailserver(self):
-        mailserver = smtplib.SMTP(self.host)
-        if self._usr and self._pwd:
-            server.login(self._usr, self._pwd)
-        return mailserver
-
-    def _get_gmail_server(self):
-        if not self._usr and self._pwd:
-            err = 'Cannot send through %s without a name and password.'
-            raise ValueError(err % self.host)
-        mailserver = smtplib.SMTP(self.host, 587)
-        mailserver.ehlo()
-        mailserver.starttls()
-        mailserver.ehlo()
-        mailserver.login(self._usr, self._pwd)
-        return mailserver
 
     def _send(self, server, msg):
         """
