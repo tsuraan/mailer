@@ -16,19 +16,22 @@ Version 0.5 is based on a patch by Douglas Mayle
 Sample code:
 
     import mailer
-    
+
     message = mailer.Message()
     message.From = "me@example.com"
     message.To = "you@example.com"
     message.Subject = "My Vacation"
     message.Body = open("letter.txt", "rb").read()
     message.attach("picture.jpg")
-    
+
     sender = mailer.Mailer('mail.example.com')
     sender.send(message)
 
 """
 import smtplib
+import threading
+import Queue
+import uuid
 
 # this is to support name changes
 # from version 2.4 to version 2.5
@@ -53,10 +56,11 @@ except ImportError:
 
 # For guessing MIME type based on file name extension
 import mimetypes
+import time
 
 from os import path
 
-__version__ = "0.5"
+__version__ = "0.6"
 __author__ = "Ryan Ginstrom"
 __license__ = "MIT"
 __description__ = "A module to send email simply in Python"
@@ -64,16 +68,17 @@ __description__ = "A module to send email simply in Python"
 class Mailer(object):
     """
     Represents an SMTP connection.
-    
+
     Use login() to log in with a username and password.
     """
 
-    def __init__(self, host="localhost", port=0):
+    def __init__(self, host="localhost", port=0, use_tls=False, usr=None, pwd=None):
         self.host = host
         self.port = port
-        self._usr = None
-        self._pwd = None
-    
+        self.use_tls = use_tls
+        self._usr = usr
+        self._pwd = pwd
+
     def login(self, usr, pwd):
         self._usr = usr
         self._pwd = pwd
@@ -88,8 +93,13 @@ class Mailer(object):
         mailer.send([msg1, msg2, msg3])
         """
         server = smtplib.SMTP(self.host, self.port)
-
+        
         if self._usr and self._pwd:
+            if self.use_tls is True:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+            
             server.login(self._usr, self._pwd)
 
         try:
@@ -100,7 +110,7 @@ class Mailer(object):
             self._send(server, msg)
 
         server.quit()
-    
+        
     def _send(self, server, msg):
         """
         Sends a single message using the server
@@ -108,32 +118,48 @@ class Mailer(object):
         """
         me = msg.From
         if isinstance(msg.To, basestring):
-            you = [msg.To]
+            to = [msg.To]
         else:
-            you = list(msg.To)
+            to = list(msg.To)
+            
+        cc = []
+        if msg.CC:
+            if isinstance(msg.CC, basestring):
+                cc = [msg.CC]
+            else:
+                cc = list(msg.CC)
+
+        bcc = []
+        if msg.BCC:
+            if isinstance(msg.BCC, basestring):
+                bcc = [msg.BCC]
+            else:
+                bcc = list(msg.BCC)            
+            
+        you = to + cc + bcc
         server.sendmail(me, you, msg.as_string())
 
 class Message(object):
     """
     Represents an email message.
-    
+
     Set the To, From, Subject, and Body attributes as plain-text strings.
     Optionally, set the Html attribute to send an HTML email, or use the
     attach() method to attach files.
-    
+
     Use the charset property to send messages using other than us-ascii
-    
+
     If you specify an attachments argument, it should be a list of
     attachment filenames: ["file1.txt", "file2.txt"]
-    
+
     `To` should be a string for a single address, and a sequence
     of strings for multiple recipients (castable to list)
-    
+
     Send using the Mailer class.
     """
 
     def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None,
-                 attachments=None, charset=None):
+                 Date=None, attachments=None, charset=None):
         self.attachments = []
         if attachments:
             for attachment in attachments:
@@ -147,14 +173,22 @@ class Message(object):
                     else:
                         self.attachments.append((filename, cid))
         self.To = To
+        self.CC = CC
+        self.BCC = BCC        
         """string or iterable"""
         self.From = From
         """string"""
         self.Subject = Subject
         self.Body = Body
         self.Html = Html
+        self.Date = Date or time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime())
         self.charset = charset or 'us-ascii'
 
+        self.message_id = self.make_key()
+        
+    def make_key(self):
+        return str(uuid.uuid4())
+    
     def as_string(self):
         """Get the email as a string to send in the mailer"""
 
@@ -162,7 +196,7 @@ class Message(object):
             return self._plaintext()
         else:
             return self._multipart()
-    
+
     def _plaintext(self):
         """Plain text email with no attachments"""
 
@@ -173,18 +207,18 @@ class Message(object):
 
         self._set_info(msg)
         return msg.as_string()
-            
+
     def _with_html(self):
         """There's an html part"""
 
         outer = MIMEMultipart('alternative')
-        
+
         part1 = MIMEText(self.Body, 'plain', self.charset)
         part2 = MIMEText(self.Html, 'html', self.charset)
 
         outer.attach(part1)
         outer.attach(part2)
-        
+
         return outer
 
     def _set_info(self, msg):
@@ -193,12 +227,23 @@ class Message(object):
         else:
             subject = unicode(self.Subject, self.charset)
             msg['Subject'] = str(make_header([(subject, self.charset)]))
+            
         msg['From'] = self.From
+        
         if isinstance(self.To, basestring):
             msg['To'] = self.To
         else:
             self.To = list(self.To)
             msg['To'] = ", ".join(self.To)
+            
+        if self.CC:
+            if isinstance(self.CC, basestring):
+                msg['CC'] = self.CC
+            else:
+                self.CC = list(self.CC)
+                msg['CC'] = ", ".join(self.CC)
+                
+        msg['Date'] = self.Date
 
     def _multipart(self):
         """The email has attachments"""
@@ -207,7 +252,7 @@ class Message(object):
 
         if self.Html:
             outer = MIMEMultipart('alternative')
-            
+
             part1 = MIMEText(self.Body, 'plain', self.charset)
             part1.add_header('Content-Disposition', 'inline')
 
@@ -264,5 +309,75 @@ class Message(object):
         Attach a file to the email. Specify the name of the file;
         Message will figure out the MIME type and load the file.
         """
-        
+
         self.attachments.append((filename, cid))
+        
+
+class Manager(threading.Thread):
+    """
+    Manages the sending of email in the background
+    
+    you can supply it with an instance of class Mailler or pass in the same 
+    parameters that you would have used to create an instance of Mailler
+    
+    if a message was succesfully sent, self.results[msg.message_id] returns a 3 
+    element tuple (True/False, err_code, err_message)
+    """
+    
+    def __init__(self, mailer=None, callback=None, **kwargs):
+        threading.Thread.__init__(self)
+        
+        self.queue = Queue.Queue()
+        self.mailer = mailer
+        self.abort = False
+        self.callback = callback
+        self._results = {}
+        self._result_lock = threading.RLock()
+        
+        if self.mailer is None:
+            self.mailer = Mailer(
+                host=kwargs.get('host', 'localhost'),
+                port=kwargs.get('port', 25),
+                use_tls=kwargs.get('use_tls', False),
+                usr=kwargs.get('usr', None),
+                pwd=kwargs.get('pwd', None),
+            )
+        
+    def __getattr__(self, name):
+        if name == 'results':
+            with self._result_lock:
+                return self._results
+        else:
+            return None
+        
+    def run(self):
+        
+        while self.abort is False:
+            msg = self.queue.get(block=True)
+            if msg is None:
+                break
+            
+            try:
+                num_msgs = len(msg)
+            except TypeError:
+                num_msgs = 1
+                msg = [msg]
+                
+            for m in msg:
+                try:
+                    self.results[m.message_id] = (False, -1, '')
+                    self.mailer.send(m) 
+                    self.results[m.message_id] = (True, 0, '')
+                    
+                    if self.callback:
+                        self.callback(m.message_id)
+                except Exception as e:
+                    self.results[m.message_id] = (False, e.args[0], e.args[1])
+            # endfor
+            
+            self.queue.task_done()
+        
+    def send(self, msg):
+        self.queue.put(msg)      
+        
+                
