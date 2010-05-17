@@ -56,7 +56,7 @@ import mimetypes
 
 from os import path
 
-__version__ = "0.5"
+__version__ = "0.6"
 __author__ = "Ryan Ginstrom"
 __license__ = "MIT"
 __description__ = "A module to send email simply in Python"
