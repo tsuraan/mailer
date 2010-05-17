@@ -16,14 +16,14 @@ Version 0.5 is based on a patch by Douglas Mayle
 Sample code:
 
     import mailer
-    
+
     message = mailer.Message()
     message.From = "me@example.com"
     message.To = "you@example.com"
     message.Subject = "My Vacation"
     message.Body = open("letter.txt", "rb").read()
     message.attach("picture.jpg")
-    
+
     sender = mailer.Mailer('mail.example.com')
     sender.send(message)
 
@@ -64,7 +64,7 @@ __description__ = "A module to send email simply in Python"
 class Mailer(object):
     """
     Represents an SMTP connection.
-    
+
     Use login() to log in with a username and password.
     """
 
@@ -73,7 +73,7 @@ class Mailer(object):
         self.port = port
         self._usr = None
         self._pwd = None
-    
+
     def login(self, usr, pwd):
         self._usr = usr
         self._pwd = pwd
@@ -87,10 +87,10 @@ class Mailer(object):
         them as a list:
         mailer.send([msg1, msg2, msg3])
         """
-        server = smtplib.SMTP(self.host, self.port)
-
-        if self._usr and self._pwd:
-            server.login(self._usr, self._pwd)
+        if 'gmail.com' in self.host or 'googlemail.com' in self.host:
+            server = self._get_gmail_server()
+        else:
+            server = self._get_mailserver()
 
         try:
             num_msgs = len(msg)
@@ -100,7 +100,24 @@ class Mailer(object):
             self._send(server, msg)
 
         server.quit()
-    
+
+    def _get_mailserver(self):
+        mailserver = smtplib.SMTP(self.host)
+        if self._usr and self._pwd:
+            server.login(self._usr, self._pwd)
+        return mailserver
+
+    def _get_gmail_server(self):
+        if not self._usr and self._pwd:
+            err = 'Cannot send through %s without a name and password.'
+            raise ValueError(err % self.host)
+        mailserver = smtplib.SMTP(self.host, 587)
+        mailserver.ehlo()
+        mailserver.starttls()
+        mailserver.ehlo()
+        mailserver.login(self._usr, self._pwd)
+        return mailserver
+
     def _send(self, server, msg):
         """
         Sends a single message using the server
@@ -116,19 +133,19 @@ class Mailer(object):
 class Message(object):
     """
     Represents an email message.
-    
+
     Set the To, From, Subject, and Body attributes as plain-text strings.
     Optionally, set the Html attribute to send an HTML email, or use the
     attach() method to attach files.
-    
+
     Use the charset property to send messages using other than us-ascii
-    
+
     If you specify an attachments argument, it should be a list of
     attachment filenames: ["file1.txt", "file2.txt"]
-    
+
     `To` should be a string for a single address, and a sequence
     of strings for multiple recipients (castable to list)
-    
+
     Send using the Mailer class.
     """
 
@@ -162,7 +179,7 @@ class Message(object):
             return self._plaintext()
         else:
             return self._multipart()
-    
+
     def _plaintext(self):
         """Plain text email with no attachments"""
 
@@ -173,18 +190,18 @@ class Message(object):
 
         self._set_info(msg)
         return msg.as_string()
-            
+
     def _with_html(self):
         """There's an html part"""
 
         outer = MIMEMultipart('alternative')
-        
+
         part1 = MIMEText(self.Body, 'plain', self.charset)
         part2 = MIMEText(self.Html, 'html', self.charset)
 
         outer.attach(part1)
         outer.attach(part2)
-        
+
         return outer
 
     def _set_info(self, msg):
@@ -207,7 +224,7 @@ class Message(object):
 
         if self.Html:
             outer = MIMEMultipart('alternative')
-            
+
             part1 = MIMEText(self.Body, 'plain', self.charset)
             part1.add_header('Content-Disposition', 'inline')
 
@@ -264,5 +281,5 @@ class Message(object):
         Attach a file to the email. Specify the name of the file;
         Message will figure out the MIME type and load the file.
         """
-        
+
         self.attachments.append((filename, cid))
