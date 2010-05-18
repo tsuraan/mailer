@@ -158,7 +158,7 @@ class Message(object):
     Send using the Mailer class.
     """
 
-    def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None,
+    def __init__(self, To=None, From=None, CC=None, BCC=None, Subject=None, Body=None, Html=None,
                  Date=None, attachments=None, charset=None):
         self.attachments = []
         if attachments:
@@ -369,10 +369,19 @@ class Manager(threading.Thread):
                     self.mailer.send(m) 
                     self.results[m.message_id] = (True, 0, '')
                     
-                    if self.callback:
-                        self.callback(m.message_id)
                 except Exception as e:
-                    self.results[m.message_id] = (False, e.args[0], e.args[1])
+                    args = e.args
+                    if len(args) < 2:
+                        args = (-1, e.args[0])
+                    
+                    self.results[m.message_id] = (False, args[0], args[1])
+
+                if self.callback:
+                    try:
+                        self.callback(m.message_id)
+                    except:
+                        pass
+                    
             # endfor
             
             self.queue.task_done()
