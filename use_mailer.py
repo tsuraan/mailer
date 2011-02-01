@@ -40,3 +40,12 @@ msg3.Subject = "HTML with Attachment"
 msg3.Html = """Hello, <b>日本語</b>"""
 msg3.attach("picture.png")
 mailer.send(msg3)
+
+# now try specifying the MIME type
+msg4 = Message(From="translation@ginstrom.com",
+                  To=["translation@ginstrom.com", "software@ginstrom.com"],
+                  charset="utf-8")
+msg4.Subject = "HTML with Attachment (MIME type specified)"
+msg4.Html = """Hello, please have a look at this image."""
+msg4.attach("picture.png", mimetype="image/png")
+mailer.send(msg4)
