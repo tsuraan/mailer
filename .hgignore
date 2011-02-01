@@ -7,3 +7,4 @@ mailer/*
 *.pyc
 *.exe
 *~
+glob:Mailer.komodoproject
