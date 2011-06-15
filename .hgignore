@@ -8,3 +8,4 @@ mailer/*
 *.exe
 *~
 glob:Mailer.komodoproject
+glob:mailer.egg-info
