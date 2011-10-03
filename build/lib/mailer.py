@@ -83,7 +83,7 @@ class Mailer(object):
         self._usr = usr
         self._pwd = pwd
 
-    def send(self, msg):
+    def send(self, msg, recips=None):
         """
         Send one message or a sequence of messages.
 
@@ -91,6 +91,11 @@ class Mailer(object):
         connection, so if you have several emails to send, pass
         them as a list:
         mailer.send([msg1, msg2, msg3])
+
+        Keyword arguments:
+        recips --- If None, the message will be sent to the to + cc + bcc
+          recipients in the message header.  Else, if this is a list of 
+          addresses, it will be sent to only the addrs listed.
         """
         server = smtplib.SMTP(self.host, self.port)
         
@@ -105,16 +110,22 @@ class Mailer(object):
         try:
             num_msgs = len(msg)
             for m in msg:
-                self._send(server, m)
+                self._send(server, m, recips=recips)
         except TypeError:
-            self._send(server, msg)
+            self._send(server, msg, recips=recips)
 
         server.quit()
         
-    def _send(self, server, msg):
+    def _send(self, server, msg, recips=None):
         """
         Sends a single message using the server
         we created in send()
+
+        Keyword arguments:
+        recips --- If None, the message will be sent to the to + cc + bcc
+          recipients in the message header.  Else, if this is a list of
+          addresses, it will be sent to only the addrs listed.
+
         """
         me = msg.From
         if isinstance(msg.To, basestring):
@@ -136,7 +147,13 @@ class Mailer(object):
             else:
                 bcc = list(msg.BCC)            
             
-        you = to + cc + bcc
+        if recips is None:
+            you = to + cc + bcc
+        else:
+            if isinstance(recips, basestring):
+                you = [recips]
+            else:
+                you = recips
         server.sendmail(me, you, msg.as_string())
 
 class Message(object):
