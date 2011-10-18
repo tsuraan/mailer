@@ -97,6 +97,10 @@ class Mailer(object):
           recipients in the message header.  Else, if this is a list of
           addresses, it will be sent to only the addrs listed.
         """
+        if recips == [None,]:
+          # I don't know why this param gets this input sometimes, but it is
+          # causing mail sending to fail.
+          recips = None
         server = smtplib.SMTP(self.host, self.port)
 
         if self._usr and self._pwd:
