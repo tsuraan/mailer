@@ -247,9 +247,9 @@ class Message(object):
         return outer
 
     def _set_info(self, msg):
-        if self.additional_headers and isinstance(self.additional_headers, dict):
-            for ahkey in self.additional_headers.keys():
-                msg.add_header(ahkey, self.additional_headers[ahkey]);
+        if hasattr(self.additional_headers, 'items'):
+            for ahkey, value in self.additional_headers.items():
+                msg.add_header(ahkey, value);
 
         if self.charset == 'us-ascii':
             msg['Subject'] = self.Subject
