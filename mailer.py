@@ -173,6 +173,9 @@ class Message(object):
     If you specify an attachments argument, it should be a list of
     attachment filenames: ["file1.txt", "file2.txt"]
 
+    If you specify an additional_headers argument, it should be a
+    dictionary of header:value associations: {"X-Magic": "Black"}
+
     `To` should be a string for a single address, and a sequence
     of strings for multiple recipients (castable to list)
 
@@ -180,7 +183,7 @@ class Message(object):
     """
 
     def __init__(self, To=None, From=None, CC=None, BCC=None, Subject=None, Body=None, Html=None,
-                 Date=None, attachments=None, charset=None):
+                 Date=None, attachments=None, additional_headers=None, charset=None):
         self.attachments = []
         if attachments:
             for attachment in attachments:
@@ -203,6 +206,7 @@ class Message(object):
         self.Body = Body
         self.Html = Html
         self.Date = Date or time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime())
+        self.additional_headers = additional_headers
         self.charset = charset or 'us-ascii'
 
         self.message_id = self.make_key()
@@ -243,6 +247,10 @@ class Message(object):
         return outer
 
     def _set_info(self, msg):
+        if hasattr(self.additional_headers, 'items'):
+            for ahkey, value in self.additional_headers.items():
+                msg.add_header(ahkey, value);
+
         if self.charset == 'us-ascii':
             msg['Subject'] = self.Subject
         else:
