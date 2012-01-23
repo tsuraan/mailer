@@ -302,10 +302,21 @@ class Message(object):
 
         return msg.as_string()
 
-    def _add_attachment(self, outer, filename, cid, mimetype):
+    def _add_attachment(self, outer, attachment, cid, mimetype):
         """
         If mimetype is None, it will try to guess the mimetype
         """
+        if isinstance(attachment, basestring):
+          filename = attachment
+          with open(filename) as fd:
+            atchcont = fd.read()
+        elif hasattr(attachment, 'name') and hasattr(attachment, 'read'):
+          filename = attachment.name
+          atchcont = attachment.read()
+        else:
+          raise ValueError(
+              "Attachment must be a file path or a named file-like object")
+
         if mimetype:
             ctype = mimetype
             encoding = None
@@ -316,20 +327,18 @@ class Message(object):
             # use a generic bag-of-bits type.
             ctype = 'application/octet-stream'
         maintype, subtype = ctype.split('/', 1)
-        fp = open(filename, 'rb')
         if maintype == 'text':
             # Note: we should handle calculating the charset
-            msg = MIMEText(fp.read(), _subtype=subtype)
+            msg = MIMEText(atchcont, _subtype=subtype)
         elif maintype == 'image':
-            msg = MIMEImage(fp.read(), _subtype=subtype)
+            msg = MIMEImage(atchcont, _subtype=subtype)
         elif maintype == 'audio':
-            msg = MIMEAudio(fp.read(), _subtype=subtype)
+            msg = MIMEAudio(atchcont, _subtype=subtype)
         else:
             msg = MIMEBase(maintype, subtype)
-            msg.set_payload(fp.read())
+            msg.set_payload(atchcont)
             # Encode the payload using Base64
             encoders.encode_base64(msg)
-        fp.close()
 
         # Set the content-ID header
         if cid:
