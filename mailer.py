@@ -72,10 +72,12 @@ class Mailer(object):
     Use login() to log in with a username and password.
     """
 
-    def __init__(self, host="localhost", port=0, use_tls=False, usr=None, pwd=None):
+    def __init__(self, host="localhost", port=0, use_tls=False, usr=None,
+            pwd=None, use_ssl=False):
         self.host = host
         self.port = port
         self.use_tls = use_tls
+        self.use_ssl = use_ssl
         self._usr = usr
         self._pwd = pwd
 
@@ -101,7 +103,10 @@ class Mailer(object):
           # I don't know why this param gets this input sometimes, but it is
           # causing mail sending to fail.
           recips = None
-        server = smtplib.SMTP(self.host, self.port)
+        if self.use_ssl:
+            server = smtplib.SMTP_SSL(self.host, self.port)
+        else:
+            server = smtplib.SMTP(self.host, self.port)
 
         if self._usr and self._pwd:
             if self.use_tls is True:
