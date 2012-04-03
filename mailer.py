@@ -333,8 +333,9 @@ class Message(object):
             ctype = 'application/octet-stream'
         maintype, subtype = ctype.split('/', 1)
         if maintype == 'text':
-            # Note: we should handle calculating the charset
-            msg = MIMEText(atchcont, _subtype=subtype)
+            # TODO: we should handle calculating the charset
+            # (but in the meantime, utf-8 is a better default than us-ascii!)
+            msg = MIMEText(atchcont, _subtype=subtype, _charset='utf-8')
         elif maintype == 'image':
             msg = MIMEImage(atchcont, _subtype=subtype)
         elif maintype == 'audio':
